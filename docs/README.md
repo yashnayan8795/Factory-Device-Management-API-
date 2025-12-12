@@ -1,93 +1,227 @@
-# Industrial Device & Location Management REST API (C++ / SQLite / Docker)
+# **Industrial Device & Location Management REST API (C++ / SQLite / Docker)**
 
-This project implements a RESTful API server in C++. It utilizes SQLite for database management, JSON for data exchange, and Boost libraries for enhanced performance. The server is designed to run on Ubuntu and is containerized using Docker for easy setup and deployment.
+A high-performance **C++17 REST API server** for managing **industrial devices and locations**, built using the **served** HTTP framework and **SQLite**.
+The API supports full CRUD operations, filtering, and is documented using **OpenAPI/Swagger**.
+This project includes **CMake** and **Docker** for seamless building and deployment.
 
-## Prerequisites
+---
 
-Before you begin, ensure you have Docker installed on your machine. If you prefer to run the server natively, you will need:
-- Ubuntu 22.04
-- CMake and Make
-- g++ or another C++ compiler
-- SQLite, Boost, Served and JSONCpp libraries
+## 📌 Features
 
-## Installation
+* **Modern C++17 REST API**
+* **Device & Location CRUD**
+* **SQLite backend with prepared statements**
+* **OpenAPI/Swagger documentation**
+* **Docker-ready**
+* **Clear modular architecture**
+* **Lightweight served HTTP engine**
 
-### Native Installation
+---
 
-To install the necessary libraries on Ubuntu, run:
+## 🏗️ Architecture Overview
 
-```bash
-   sudo apt-get update
-   sudo apt-get install build-essential 
-   sudo apt-get install g++ 
-   sudo apt-get install cmake 
-   sudo apt-get install make 
-   sudo apt-get install sqlite3 libsqlite3-dev
-   sudo apt-get install libjsoncpp-dev
-   sudo apt-get install libboost-all-dev
-   sudo apt-get install git 
-   git clone https://github.com/meltwater/served.git \
-      && mkdir served/build && cd served/build \
-      && cmake .. && make && make install
+```
+rest-API-master/
+│
+├── docs/
+│   ├── device-api.yaml        # OpenAPI specification
+│   └── Database.md            # Database schema documentation
+│
+├── src/
+│   ├── main.cpp               # Application entry point
+│   ├── server/
+│   │   ├── server_manager.hpp
+│   │   └── server_manager.cpp
+│   ├── handlers/              # Business logic for endpoints
+│   ├── database/
+│   │   ├── database_manager.hpp
+│   │   └── database_manager.cpp
+│   └── utilities/             # Config helpers, constants, utils
+│
+├── Dockerfile                 # Build container
+├── CMakeLists.txt             # Build configuration
+└── README.md
 ```
 
-### Docker Installation
+---
 
-To build and run the server using Docker, no additional installation steps are required apart from having Docker installed.
+## ⚙️ Prerequisites
 
-## Building the Server
+Install the following:
 
-### Native Build
+* **CMake ≥ 3.10**
+* **GCC/Clang with C++17 support**
+* **SQLite3**
+* **served library**
+* **Docker (optional)**
 
-1. Extract project from compressed tar archive
-
-2. Build the project using CMake:
-
-```bash
-   mkdir build
-   cd build
-   cmake ..
-   make
-```
-
-### Docker Build
-
-1. Build the Docker image for the server:
+### Install served
 
 ```bash
-   docker build -t device-server .
+git clone https://github.com/meltwater/served.git
+cd served
+mkdir build && cd build
+cmake ..
+make -j4
+sudo make install
 ```
 
-## Running the Server
+---
 
-### Native Run
-
-After building the project, you can run the server with:
+## 🔧 Building the Project
 
 ```bash
-   ./build/server
+mkdir build && cd build
+cmake ..
+make -j4
 ```
 
-### Docker Run
+The compiled binary will be located at:
 
-Start the server in a Docker container:
+```
+build/bin/device-server
+```
+
+---
+
+## ▶️ Running the Server
 
 ```bash
-   docker run -p 8080:8080 device-server
+./device-server
 ```
 
-## Interacting with the Server
+Default host & port:
 
-Interact with the server using HTTP client tools like `curl`. Example API calls:
+```
+http://localhost:8080
+```
 
-# Example GET request
+Configuration values can be changed in:
+
+```
+src/utilities/config.hpp
+```
+
+---
+
+## 🗄️ Database
+
+The server uses **SQLite**, automatically creating the database and tables on first run.
+
+To reset the DB:
 
 ```bash
-curl -X GET http://0.0.0.0:8080/devices
+rm device_database.db
 ```
 
-# Example POST request
-```bash
-curl -X POST http://0.0.0.0:8080/locations -H "Content-Type: application/json" -d '{"name": "Main Office", "type": "Office"}'
+(Or the name configured in your source.)
+
+---
+
+## 📘 API Documentation (OpenAPI)
+
+The complete API spec is located at:
+
 ```
+docs/device-api.yaml
+```
+
+### View via Swagger Editor:
+
+Open:
+[https://editor.swagger.io](https://editor.swagger.io)
+→ Upload `device-api.yaml`
+
+### Run Swagger UI via Docker:
+
+```bash
+docker run -p 8081:8080 \
+  -e SWAGGER_JSON=/docs/device-api.yaml \
+  -v $(pwd)/docs:/docs swaggerapi/swagger-ui
+```
+
+Access Swagger UI at:
+
+```
+http://localhost:8081
+```
+
+---
+
+## 🔌 Example API Usage
+
+### 1. Get all devices
+
+```bash
+curl -X GET http://localhost:8080/devices
+```
+
+### 2. Filter devices
+
+```bash
+curl -X GET "http://localhost:8080/devices?location=Factory-A&status=active"
+```
+
+### 3. Create device
+
+```bash
+curl -X POST http://localhost:8080/devices \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Sensor-01", "type": "temperature", "location_id": 3}'
+```
+
+### 4. Delete device
+
+```bash
+curl -X DELETE http://localhost:8080/devices/5
+```
+
+---
+
+## 🐳 Docker Deployment
+
+### Build image:
+
+```bash
+docker build -t device-server .
+```
+
+### Run container:
+
+```bash
+docker run -p 8080:8080 device-server
+```
+
+---
+
+## 🧪 Testing (Recommended Setup)
+
+Add tests using:
+
+* **Catch2** for unit tests
+* **Curl/Postman** for endpoint tests
+* **Docker** for integration testing
+
+Example:
+
+```bash
+ctest --output-on-failure
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the project
+2. Create a branch
+3. Commit changes
+4. Open a Pull Request
+
+Please follow modern C++17 standards and add documentation where needed.
+
+---
+
+## 📄 License
+
+This project uses the license provided in the repository (or you may add one such as MIT/Apache-2.0).
 
