@@ -1,4 +1,4 @@
-# RESTful API for Managing Devices and Locations in a Factory Environment
+# Industrial Device & Location Management REST API (C++ / SQLite / Docker)
 
 This project implements a RESTful API server in C++. It utilizes SQLite for database management, JSON for data exchange, and Boost libraries for enhanced performance. The server is designed to run on Ubuntu and is containerized using Docker for easy setup and deployment.
 
